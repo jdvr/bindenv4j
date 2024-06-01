@@ -4,6 +4,7 @@ package dev.juanvega.bindenv4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.Reader;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +62,33 @@ class EnvBinderTest {
         assertThat(result.getMax()).isEqualTo(99);
     }
 
+    @Test
+    public void support_records() {
+        var binder = new EnvBinder(new BasicRecord.CustomReader(2.55, true));
+        var result = binder.bind(BasicRecord.class);
+        assertThat(result.limit).isEqualTo(2.55);
+        assertThat(result.isFeatureEnabled).isTrue();
+    }
+
+    record BasicRecord(Double limit, Boolean isFeatureEnabled) {
+        static class CustomReader implements EnvReader {
+            Double limit;
+            Boolean isFeatureEnabled;
+            CustomReader(Double limit, Boolean isFeatureEnabled) {
+                this.limit = limit;
+                this.isFeatureEnabled = isFeatureEnabled;
+            }
+            @Override
+            public <T> Optional<T> read(String key, T targetType) {
+                return switch (key) {
+                    case "limit" -> Optional.ofNullable((T) limit);
+                    case "isFeatureEnabled" -> Optional.ofNullable((T) isFeatureEnabled);
+                    case null, default -> new AlwaysFailReader().read(key, targetType);
+                };
+            }
+        }
+    }
+
     static class PrivateFieldWithObject {
         private int max;
         private String name;
@@ -80,6 +108,7 @@ class EnvBinderTest {
                 this.max = max;
                 this.name = name;
             }
+
             @Override
             public <T> Optional<T> read(String key, T targetType) {
                 return switch (key) {
