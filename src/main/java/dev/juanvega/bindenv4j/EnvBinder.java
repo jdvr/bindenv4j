@@ -1,5 +1,7 @@
 package dev.juanvega.bindenv4j;
 
+import com.sun.jdi.Value;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -41,7 +43,13 @@ public class EnvBinder {
                 envVarName = field.getAnnotation(Name.class).value();
             }
             Optional<?> envData = envReader.read(envVarName, field.getType());
-            var value = envData.orElseThrow(() -> new IllegalStateException("No value for " + field.getName()));
+            var value = envData.orElseGet(() -> {
+                if (field.getType().isPrimitive()) {
+                    throw new IllegalStateException("No value for " + field.getName());
+                }
+
+                return  null;
+            });
             try {
                 field.set(instance, value);
             } catch (IllegalAccessException e) {

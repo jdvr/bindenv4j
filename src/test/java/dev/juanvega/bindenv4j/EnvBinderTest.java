@@ -37,6 +37,17 @@ class EnvBinderTest {
     }
 
     @Test
+    public void object_fields_are_optional() {
+        var binder = new EnvBinder(new PrivateFieldWithObject.CustomReader(
+                893,
+                null
+        ));
+        var bound = binder.bind(PrivateFieldWithObject.class);
+        Assertions.assertThat(bound.max).isEqualTo(893);
+        Assertions.assertThat(bound.name).isNull();
+    }
+
+    @Test
     public void ignore_static_fields() {
         var binder = new EnvBinder(new AlwaysFailReader());
         var bound = binder.bind(IgnoreStaticFields.class);
