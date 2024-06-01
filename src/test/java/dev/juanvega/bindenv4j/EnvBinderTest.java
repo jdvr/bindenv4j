@@ -70,14 +70,24 @@ class EnvBinderTest {
         assertThat(result.isFeatureEnabled).isTrue();
     }
 
+    @Test
+    public void support_custom_name_records() {
+        var binder = new EnvBinder(new BasicRecord.CustomReader(55.99, false));
+        var result = binder.bind(CustomNameRecord.class);
+        assertThat(result.thresholdForAlert).isEqualTo(55.99);
+        assertThat(result.isFeatureEnabled).isFalse();
+    }
+
     record BasicRecord(Double limit, Boolean isFeatureEnabled) {
         static class CustomReader implements EnvReader {
             Double limit;
             Boolean isFeatureEnabled;
+
             CustomReader(Double limit, Boolean isFeatureEnabled) {
                 this.limit = limit;
                 this.isFeatureEnabled = isFeatureEnabled;
             }
+
             @Override
             public <T> Optional<T> read(String key, T targetType) {
                 return switch (key) {
@@ -87,6 +97,13 @@ class EnvBinderTest {
                 };
             }
         }
+    }
+
+    record CustomNameRecord(
+            @Name("limit")
+            Double thresholdForAlert,
+            boolean isFeatureEnabled
+    ) {
     }
 
     static class PrivateFieldWithObject {
@@ -104,6 +121,7 @@ class EnvBinderTest {
         static class CustomReader implements EnvReader {
             Integer max;
             String name;
+
             CustomReader(Integer max, String name) {
                 this.max = max;
                 this.name = name;

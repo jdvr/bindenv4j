@@ -47,7 +47,10 @@ public class EnvBinder {
                     var targetParameterName = parameter.getName();
                     var field = valuesByField.stream().filter(
                             entry -> entry.getKey().getName().equals(targetParameterName)
-                    ).findFirst().orElseThrow(() -> new IllegalStateException("Unable to find field for constructor parameter %s".formatted(targetParameterName)));
+                    ).findFirst().orElseThrow(
+                            () -> new IllegalStateException(
+                            "Unable to find field for constructor parameter %s".formatted(targetParameterName))
+                    );
                     parameterValues[i] = field.getValue();
                 }
                 return (T) targetConstructor.newInstance(parameterValues);
