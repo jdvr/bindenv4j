@@ -8,6 +8,7 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.2.0" }
+
 assertj-bom = { module = "org.assertj:assertj-bom", version = "3.24.2" }
 assertj-core = { module = "org.assertj:assertj-core" }
-

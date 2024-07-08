@@ -1,5 +1,7 @@
 package dev.juanvega.bindenv4j;
 
+import dev.juanvega.bindenv4j.reader.EnvReader;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;

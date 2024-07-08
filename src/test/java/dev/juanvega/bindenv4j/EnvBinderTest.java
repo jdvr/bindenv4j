@@ -1,10 +1,10 @@
 package dev.juanvega.bindenv4j;
 
 
+import dev.juanvega.bindenv4j.reader.EnvReader;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.Reader;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,7 +89,7 @@ class EnvBinderTest {
             }
 
             @Override
-            public <T> Optional<T> read(String key, T targetType) {
+            public <T> Optional<T> read(String key, Class<T> targetType) {
                 return switch (key) {
                     case "limit" -> Optional.ofNullable((T) limit);
                     case "isFeatureEnabled" -> Optional.ofNullable((T) isFeatureEnabled);
@@ -128,18 +128,12 @@ class EnvBinderTest {
             }
 
             @Override
-            public <T> Optional<T> read(String key, T targetType) {
+            public <T> Optional<T> read(String key, Class<T> targetType) {
                 return switch (key) {
                     case "name" -> Optional.ofNullable((T) name);
                     case "max" -> Optional.ofNullable((T) max);
                     case null, default -> unknown(key, targetType);
                 };
-            }
-
-            private static <T> Optional<T> unknown(String key, T targetType) {
-                throw new IllegalArgumentException(
-                        "Unknown key %s of type %s".formatted(key, targetType.getClass().getSimpleName())
-                );
             }
         }
     }
@@ -155,14 +149,12 @@ class EnvBinderTest {
 
         static class CustomReader implements EnvReader {
             @Override
-            public <T> Optional<T> read(String key, T targetType) {
+            public <T> Optional<T> read(String key, Class<T> targetType) {
                 if (key.equals(ENV_VAR_NAME)) {
                     return Optional.of((T) Integer.valueOf(99));
                 }
 
-                throw new IllegalArgumentException(
-                        "Unknown key %s of type %s".formatted(key, targetType.getClass().getSimpleName())
-                );
+                return unknown(key, targetType);
             }
         }
     }
@@ -173,11 +165,15 @@ class EnvBinderTest {
 
     static class AlwaysFailReader implements EnvReader {
         @Override
-        public <T> Optional<T> read(String key, T targetType) {
-            throw new IllegalArgumentException(
-                    "Unknown key %s of type %s".formatted(key, targetType.getClass().getSimpleName())
-            );
+        public <T> Optional<T> read(String key, Class<T> targetType) {
+            return unknown(key, targetType);
         }
+    }
+
+    private static <T> Optional<T> unknown(String key, Class<T> targetType) {
+        throw new IllegalArgumentException(
+                "Unknown key %s of type %s".formatted(key, targetType.getSimpleName())
+        );
     }
 
 

@@ -24,6 +24,7 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.engine)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.pioneer)
 
     testImplementation(platform(libs.assertj.bom))
     testImplementation(libs.assertj.core)
@@ -40,6 +41,10 @@ testing {
 tasks {
     withType<Test> {
         useJUnitPlatform()
+        jvmArgs(
+            "--add-opens=java.base/java.util=ALL-UNNAMED",
+            "--add-opens=java.base/java.lang=ALL-UNNAMED"
+        )
     }
 }
 

@@ -16,7 +16,6 @@ Easily bind environment variables into a Java POJO.
 ## TODO
 
 - Recursive binding
-- Support record
 
 # Examples
 
