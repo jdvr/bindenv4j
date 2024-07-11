@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "dev.juanvega"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 
 
