@@ -61,4 +61,13 @@ publishing {
             }
         }
     }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "dev.juanvega"
+            artifactId = "bindenv4j"
+            version = "${project.version}"
+
+            from(components["java"])
+        }
+    }
 }
