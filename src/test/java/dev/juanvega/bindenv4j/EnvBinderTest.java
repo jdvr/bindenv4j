@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EnvBinderTest {
+public class EnvBinderTest {
 
     @Test
     public void support_plain_class() {
@@ -106,7 +106,7 @@ class EnvBinderTest {
     ) {
     }
 
-    static class PrivateFieldWithObject {
+    public static class PrivateFieldWithObject {
         private int max;
         private String name;
 
