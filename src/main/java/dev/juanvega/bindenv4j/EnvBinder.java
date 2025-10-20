@@ -26,9 +26,20 @@ public class EnvBinder {
     public <T> T bind(Class<T> classType) {
 
         try {
-            if (classType.isRecord()) {
+
                 var constructors = classType.getDeclaredConstructors();
                 var targetConstructor = constructors[0];
+
+                if (targetConstructor.getParameters().length == 0) {
+                    Object instance = targetConstructor.newInstance();
+                    var valuesByField = fieldValues(classType);
+                    for (Map.Entry<Field, Object> valueByField : valuesByField.entrySet()) {
+                        valueByField.getKey().setAccessible(true);
+                        valueByField.getKey().set(instance, valueByField.getValue());
+                    }
+                    return (T) instance;
+                }
+
                 var valuesByField = fieldValuesByName(classType);
                 targetConstructor.setAccessible(true);
                 Parameter[] parameters = targetConstructor.getParameters();
@@ -44,15 +55,7 @@ public class EnvBinder {
                     parameterValues[i] = valuesByField.get(targetParameterName);
                 }
                 return (T) targetConstructor.newInstance(parameterValues);
-            } else {
-                T instance = classType.newInstance();
-                var valuesByField = fieldValues(classType);
-                for (Map.Entry<Field, Object> valueByField : valuesByField.entrySet()) {
-                    valueByField.getKey().setAccessible(true);
-                    valueByField.getKey().set(instance, valueByField.getValue());
-                }
-                return instance;
-            }
+
 
 
         } catch (InstantiationException | InvocationTargetException |

@@ -78,6 +78,36 @@ public class EnvBinderTest {
         assertThat(result.isFeatureEnabled).isFalse();
     }
 
+
+    @Test
+    public void constructor_parameter_must_have_a_matching_field() {
+        var binder = new EnvBinder(new EnvReader() {
+            @Override
+            public <T> Optional<T> read(String key, Class<T> targetType) {
+                if ("a".equals(key)) {
+                    return Optional.of((T) Integer.valueOf(1));
+                }
+                return Optional.empty();
+            }
+        });
+
+        var exception = Assertions.catchThrowableOfType(
+                () -> binder.bind(MismatchedConstructorParameter.class),
+                IllegalStateException.class
+        );
+
+        Assertions.assertThat(exception)
+                .hasMessage("Unable to find field for constructor parameter b");
+    }
+
+    static class MismatchedConstructorParameter {
+        final int a;
+
+        MismatchedConstructorParameter(int b) {
+            this.a = b;
+        }
+    }
+
     record BasicRecord(Double limit, Boolean isFeatureEnabled) {
         static class CustomReader implements EnvReader {
             Double limit;
