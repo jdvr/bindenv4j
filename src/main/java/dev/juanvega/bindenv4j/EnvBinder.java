@@ -10,6 +10,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+
+/**
+ * Binds environment variables to an instance of a class.
+ *
+ * <p>This class uses an {@link EnvReader} to read environment variables and populate the fields of
+ * a given class. It supports both classes with public fields and classes with private fields and
+ * setters.</p>
+ *
+ * <p>Example of usage:
+ *
+ * <pre>{@code
+ * public class Config {
+ *   @Name("SERVER_HOST")
+ *   private String host;
+ *
+ *   @Name("SERVER_PORT")
+ *   private int port;
+ *
+ *   // Getters...
+ * }
+ *
+ * EnvBinder binder = new EnvBinder(EnvReader.defaultReader());
+ * Config config = binder.bind(Config.class);
+ * }</pre>
+ *
+ * </p>
+ */
 public class EnvBinder {
 
     private final EnvReader envReader;
@@ -27,39 +54,35 @@ public class EnvBinder {
 
         try {
 
-                var constructors = classType.getDeclaredConstructors();
-                var targetConstructor = constructors[0];
+            var constructors = classType.getDeclaredConstructors();
+            var targetConstructor = constructors[0];
 
-                if (targetConstructor.getParameters().length == 0) {
-                    Object instance = targetConstructor.newInstance();
-                    var valuesByField = fieldValues(classType);
-                    for (Map.Entry<Field, Object> valueByField : valuesByField.entrySet()) {
-                        valueByField.getKey().setAccessible(true);
-                        valueByField.getKey().set(instance, valueByField.getValue());
-                    }
-                    return (T) instance;
+            if (targetConstructor.getParameters().length == 0) {
+                Object instance = targetConstructor.newInstance();
+                var valuesByField = fieldValues(classType);
+                for (Map.Entry<Field, Object> valueByField : valuesByField.entrySet()) {
+                    valueByField.getKey().setAccessible(true);
+                    valueByField.getKey().set(instance, valueByField.getValue());
                 }
+                return (T) instance;
+            }
 
-                var valuesByField = fieldValuesByName(classType);
-                targetConstructor.setAccessible(true);
-                Parameter[] parameters = targetConstructor.getParameters();
-                Object[] parameterValues = new Object[parameters.length];
-                for (var i = 0; i < parameters.length; i++) {
-                    var parameter = parameters[i];
-                    var targetParameterName = parameter.getName();
-                    if (!valuesByField.containsKey(targetParameterName)) {
-                        throw new IllegalStateException(
-                                "Unable to find field for constructor parameter %s".formatted(targetParameterName)
-                        );
-                    }
-                    parameterValues[i] = valuesByField.get(targetParameterName);
+            var valuesByField = fieldValuesByName(classType);
+            targetConstructor.setAccessible(true);
+            Parameter[] parameters = targetConstructor.getParameters();
+            Object[] parameterValues = new Object[parameters.length];
+            for (var i = 0; i < parameters.length; i++) {
+                var parameter = parameters[i];
+                var targetParameterName = parameter.getName();
+                if (!valuesByField.containsKey(targetParameterName)) {
+                    throw new IllegalStateException("Unable to find field for constructor parameter %s".formatted(targetParameterName));
                 }
-                return (T) targetConstructor.newInstance(parameterValues);
+                parameterValues[i] = valuesByField.get(targetParameterName);
+            }
+            return (T) targetConstructor.newInstance(parameterValues);
 
 
-
-        } catch (InstantiationException | InvocationTargetException |
-                 IllegalAccessException e) {
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
@@ -95,6 +118,5 @@ public class EnvBinder {
                 .map(entry -> Map.entry(entry.getKey().getName(), entry.getValue()))
                 .toArray(Map.Entry[]::new);
         return Map.ofEntries(entries);
-
     }
 }
