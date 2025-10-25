@@ -1,6 +1,7 @@
 plugins {
     java
     `maven-publish`
+    id("org.jetbrains.dokka") version "2.0.0"
 }
 
 group = "dev.juanvega"
@@ -72,5 +73,27 @@ publishing {
 
             from(components["java"])
         }
+    }
+}
+
+dokka {
+    moduleName.set("BindEnv4J")
+    dokkaPublications.html {
+        suppressInheritedMembers.set(true)
+        failOnWarning.set(true)
+        outputDirectory.set(layout.buildDirectory.dir("docs"))
+    }
+    dokkaSourceSets.named("javaMain") {
+        includes.from("README.md")
+        sourceLink {
+            localDirectory.set(file("src/main/java"))
+            // https://github.com/jdvr/bindenv4j/blob/main/dev/juanvega/bindenv4j/EnvBinder.java#L40
+            // https://github.com/jdvr/bindenv4j/blob/main/src/main/java/dev/juanvega/bindenv4j/EnvBinder.java
+            remoteUrl("https://github.com/jdvr/bindenv4j/blob/main/src/main/java")
+            remoteLineSuffix.set("#L")
+        }
+    }
+    pluginsConfiguration.html {
+        footerMessage.set("(c) Juan Vega")
     }
 }

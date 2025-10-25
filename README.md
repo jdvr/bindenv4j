@@ -1,4 +1,4 @@
-BindEnv4J
+Module BindEnv4J
 ---
 
 Easily bind environment variables into a Java POJO.
